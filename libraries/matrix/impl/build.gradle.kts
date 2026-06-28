@@ -48,6 +48,7 @@ dependencies {
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.serialization.json)
     implementation(libs.kotlinx.collections.immutable)
+    implementation(projects.libraries.matrixmedia.api)
 
     testCommonDependencies(libs)
     testImplementation(projects.features.enterprise.test)

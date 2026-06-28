@@ -60,12 +60,14 @@ import io.element.android.libraries.matrix.api.core.RoomId
 import io.element.android.libraries.matrix.api.core.ThreadId
 import io.element.android.libraries.matrix.api.core.UserId
 import io.element.android.libraries.matrix.api.core.toRoomIdOrAlias
+import io.element.android.libraries.matrix.api.media.MatrixMediaLoader
 import io.element.android.libraries.matrix.api.permalink.PermalinkData
 import io.element.android.libraries.matrix.api.permalink.PermalinkParser
 import io.element.android.libraries.matrix.api.room.JoinedRoom
 import io.element.android.libraries.matrix.api.room.alias.matches
 import io.element.android.libraries.matrix.api.timeline.Timeline
 import io.element.android.libraries.matrix.api.timeline.item.TimelineItemDebugInfo
+import io.element.android.libraries.matrix.ui.media.MediaTransferManager
 import io.element.android.libraries.mediaplayer.api.MediaPlayer
 import io.element.android.libraries.ui.strings.CommonStrings
 import io.element.android.libraries.ui.utils.a11y.hasExternalKeyboard
@@ -96,6 +98,8 @@ class MessagesNode(
     private val permalinkParser: PermalinkParser,
     private val knockRequestsBannerRenderer: KnockRequestsBannerRenderer,
     private val roomMemberModerationRenderer: RoomMemberModerationRenderer,
+    private val mediaTransferManager: MediaTransferManager,
+    private val mediaLoader: MatrixMediaLoader,
 ) : Node(buildContext, plugins = plugins), MessagesNavigator {
     data class Inputs(
         val focusedEventId: EventId?,
@@ -108,7 +112,7 @@ class MessagesNode(
     private val presenter = presenterFactory.create(
         navigator = this,
         composerPresenter = messageComposerPresenterFactory.create(timelineController, this, isInThread = false),
-        timelinePresenter = timelinePresenterFactory.create(timelineController = timelineController, this),
+        timelinePresenter = timelinePresenterFactory.create(timelineController = timelineController, navigator = this, mediaLoader = mediaLoader),
         actionListPresenter = actionListPresenterFactory.create(
             postProcessor = TimelineItemActionPostProcessor.Default,
             timelineMode = timelineController.mainTimelineMode(),
@@ -272,6 +276,7 @@ class MessagesNode(
             }
             MessagesView(
                 state = state,
+                mediaTransferManager = mediaTransferManager,
                 onBackClick = { state.eventSink(MessagesEvent.MarkAsFullyReadAndExit) },
                 onRoomDetailsClick = callback::navigateToRoomDetails,
                 onEventContentClick = { isLive, event ->

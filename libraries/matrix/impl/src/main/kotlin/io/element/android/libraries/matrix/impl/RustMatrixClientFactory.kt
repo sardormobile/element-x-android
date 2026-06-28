@@ -25,6 +25,7 @@ import io.element.android.libraries.matrix.impl.proxy.ProxyProvider
 import io.element.android.libraries.matrix.impl.room.TimelineEventFilterFactory
 import io.element.android.libraries.matrix.impl.storage.SqliteStoreBuilderProvider
 import io.element.android.libraries.matrix.impl.util.anonymizedTokens
+import io.element.android.libraries.matrix.ui.media.MediaTransferManager
 import io.element.android.libraries.network.useragent.UserAgentProvider
 import io.element.android.libraries.sessionstorage.api.SessionData
 import io.element.android.libraries.sessionstorage.api.SessionStore
@@ -68,6 +69,7 @@ class RustMatrixClientFactory(
     private val clientBuilderProvider: ClientBuilderProvider,
     private val sqliteStoreBuilderProvider: SqliteStoreBuilderProvider,
     private val workManagerScheduler: WorkManagerScheduler,
+    private val transferManager: MediaTransferManager
 ) {
     private val sessionDelegate = RustClientSessionDelegate(
         sessionStore = sessionStore,
@@ -133,6 +135,7 @@ class RustMatrixClientFactory(
             featureFlagService = featureFlagService,
             analyticsService = analyticsService,
             workManagerScheduler = workManagerScheduler,
+            mediaTransferManager = transferManager
         ).also {
             Timber.tag("RustMatrixClient").i("Creating Client with access token '$anonymizedAccessToken' and refresh token '$anonymizedRefreshToken'")
         }

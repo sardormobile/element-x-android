@@ -15,6 +15,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.pluralStringResource
+import io.element.android.features.messages.impl.FakeMediaTransferManager
+import io.element.android.features.messages.impl.MessagesEvent
 import io.element.android.features.messages.impl.R
 import io.element.android.features.messages.impl.timeline.TimelineEvent
 import io.element.android.features.messages.impl.timeline.TimelineRoomInfo
@@ -34,6 +36,7 @@ import io.element.android.libraries.designsystem.preview.PreviewsDayNight
 import io.element.android.libraries.matrix.api.core.EventId
 import io.element.android.libraries.matrix.api.timeline.Timeline
 import io.element.android.libraries.matrix.api.user.MatrixUser
+import io.element.android.libraries.matrix.ui.media.MediaTransferManager
 import io.element.android.libraries.ui.utils.a11y.isTalkbackActive
 import io.element.android.wysiwyg.link.Link
 
@@ -43,6 +46,7 @@ fun TimelineItemGroupedEventsRow(
     timelineMode: Timeline.Mode,
     timelineRoomInfo: TimelineRoomInfo,
     timelineProtectionState: TimelineProtectionState,
+    mediaTransferManager: MediaTransferManager,
     renderReadReceipts: Boolean,
     isLastOutgoingMessage: Boolean,
     focusedEventId: EventId?,
@@ -58,11 +62,13 @@ fun TimelineItemGroupedEventsRow(
     onMoreReactionsClick: (TimelineItem.Event) -> Unit,
     onReadReceiptClick: (TimelineItem.Event) -> Unit,
     eventSink: (TimelineEvent.TimelineItemEvent) -> Unit,
+    onMediaFileTransfer: ((MessagesEvent.MediaFileTransfer) -> Unit)?,
     modifier: Modifier = Modifier,
     eventContentView: @Composable (TimelineItem.Event, Modifier, (ContentAvoidingLayoutData) -> Unit) -> Unit =
         { event, contentModifier, onContentLayoutChange ->
             TimelineItemEventContentView(
                 content = event.content,
+                mediaTransferManager = mediaTransferManager,
                 hideMediaContent = timelineProtectionState.hideMediaContent(event.eventId, event.isMine),
                 onShowContentClick = { timelineProtectionState.eventSink(TimelineProtectionEvent.ShowContent(event.eventId)) },
                 onLinkClick = onLinkClick,
@@ -71,7 +77,8 @@ fun TimelineItemGroupedEventsRow(
                 modifier = contentModifier,
                 onContentClick = null,
                 onLongClick = null,
-                onContentLayoutChange = onContentLayoutChange
+                onContentLayoutChange = onContentLayoutChange,
+                onMediaFileTransfer = null
             )
         },
 ) {
@@ -83,6 +90,7 @@ fun TimelineItemGroupedEventsRow(
 
     TimelineItemGroupedEventsRowContent(
         isExpanded = isExpanded.value,
+        mediaTransferManager = mediaTransferManager,
         onExpandGroupClick = ::onExpandGroupClick,
         timelineItem = timelineItem,
         timelineMode = timelineMode,
@@ -105,6 +113,7 @@ fun TimelineItemGroupedEventsRow(
         eventSink = eventSink,
         modifier = modifier,
         eventContentView = eventContentView,
+        onMediaFileTransfer = onMediaFileTransfer
     )
 }
 
@@ -116,6 +125,7 @@ private fun TimelineItemGroupedEventsRowContent(
     timelineMode: Timeline.Mode,
     timelineRoomInfo: TimelineRoomInfo,
     timelineProtectionState: TimelineProtectionState,
+    mediaTransferManager: MediaTransferManager,
     focusedEventId: EventId?,
     renderReadReceipts: Boolean,
     isLastOutgoingMessage: Boolean,
@@ -131,11 +141,13 @@ private fun TimelineItemGroupedEventsRowContent(
     onMoreReactionsClick: (TimelineItem.Event) -> Unit,
     onReadReceiptClick: (TimelineItem.Event) -> Unit,
     eventSink: (TimelineEvent.TimelineItemEvent) -> Unit,
+    onMediaFileTransfer: ((MessagesEvent.MediaFileTransfer) -> Unit)?,
     modifier: Modifier = Modifier,
     eventContentView: @Composable (TimelineItem.Event, Modifier, (ContentAvoidingLayoutData) -> Unit) -> Unit =
         { event, contentModifier, onContentLayoutChange ->
             TimelineItemEventContentView(
                 content = event.content,
+                mediaTransferManager = mediaTransferManager,
                 hideMediaContent = timelineProtectionState.hideMediaContent(event.eventId, event.isMine),
                 onShowContentClick = { timelineProtectionState.eventSink(TimelineProtectionEvent.ShowContent(event.eventId)) },
                 onLinkClick = onLinkClick,
@@ -144,7 +156,8 @@ private fun TimelineItemGroupedEventsRowContent(
                 modifier = contentModifier,
                 onContentClick = null,
                 onLongClick = null,
-                onContentLayoutChange = onContentLayoutChange
+                onContentLayoutChange = onContentLayoutChange,
+                onMediaFileTransfer = null
             )
         },
 ) {
@@ -173,6 +186,7 @@ private fun TimelineItemGroupedEventsRowContent(
                         timelineItem = subGroupEvent,
                         timelineRoomInfo = timelineRoomInfo,
                         timelineProtectionState = timelineProtectionState,
+                        mediaTransferManager = mediaTransferManager,
                         renderReadReceipts = renderReadReceipts,
                         isLastOutgoingMessage = isLastOutgoingMessage,
                         focusedEventId = focusedEventId,
@@ -190,6 +204,7 @@ private fun TimelineItemGroupedEventsRowContent(
                         onSwipeToReply = {},
                         eventSink = eventSink,
                         eventContentView = eventContentView,
+                        onMediaFileTransfer = onMediaFileTransfer
                     )
                 }
             }
@@ -218,6 +233,7 @@ internal fun TimelineItemGroupedEventsRowContentExpandedPreview() = ElementPrevi
         timelineMode = Timeline.Mode.Live,
         timelineRoomInfo = aTimelineRoomInfo(),
         timelineProtectionState = aTimelineProtectionState(),
+        mediaTransferManager = FakeMediaTransferManager,
         focusedEventId = events.events.first().eventId,
         renderReadReceipts = true,
         isLastOutgoingMessage = false,
@@ -233,6 +249,7 @@ internal fun TimelineItemGroupedEventsRowContentExpandedPreview() = ElementPrevi
         onMoreReactionsClick = {},
         onReadReceiptClick = {},
         eventSink = {},
+        onMediaFileTransfer = {}
     )
 }
 
@@ -246,6 +263,7 @@ internal fun TimelineItemGroupedEventsRowContentCollapsePreview() = ElementPrevi
         timelineMode = Timeline.Mode.Live,
         timelineRoomInfo = aTimelineRoomInfo(),
         timelineProtectionState = aTimelineProtectionState(),
+        mediaTransferManager = FakeMediaTransferManager,
         focusedEventId = null,
         renderReadReceipts = true,
         isLastOutgoingMessage = false,
@@ -261,5 +279,6 @@ internal fun TimelineItemGroupedEventsRowContentCollapsePreview() = ElementPrevi
         onMoreReactionsClick = {},
         onReadReceiptClick = {},
         eventSink = {},
+        onMediaFileTransfer = {}
     )
 }

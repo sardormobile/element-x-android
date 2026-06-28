@@ -86,6 +86,7 @@ import io.element.android.libraries.matrix.impl.util.cancelAndDestroy
 import io.element.android.libraries.matrix.impl.util.mxCallbackFlow
 import io.element.android.libraries.matrix.impl.verification.RustSessionVerificationService
 import io.element.android.libraries.matrix.impl.workmanager.PerformDatabaseVacuumRequestBuilder
+import io.element.android.libraries.matrix.ui.media.MediaTransferManager
 import io.element.android.libraries.sessionstorage.api.SessionStore
 import io.element.android.libraries.workmanager.api.WorkManagerRequestType
 import io.element.android.libraries.workmanager.api.WorkManagerScheduler
@@ -149,6 +150,7 @@ class RustMatrixClient(
     private val featureFlagService: FeatureFlagService,
     private val analyticsService: AnalyticsService,
     private val workManagerScheduler: WorkManagerScheduler,
+    private val mediaTransferManager: MediaTransferManager
 ) : MatrixClient {
     override val sessionId: UserId = UserId(innerClient.userId())
     override val deviceId: DeviceId = DeviceId(innerClient.deviceId())
@@ -249,6 +251,7 @@ class RustMatrixClient(
         baseCacheDirectory = baseCacheDirectory,
         dispatchers = dispatchers,
         innerClient = innerClient,
+        mediaTransferManager = mediaTransferManager
     )
 
     override val mediaPreviewService = RustMediaPreviewService(

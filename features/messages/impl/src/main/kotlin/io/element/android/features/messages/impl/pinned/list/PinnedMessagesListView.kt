@@ -25,6 +25,8 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import im.vector.app.features.analytics.plan.Interaction
 import io.element.android.compound.tokens.generated.CompoundIcons
+import io.element.android.features.messages.impl.FakeMediaTransferManager
+import io.element.android.features.messages.impl.MessagesEvent
 import io.element.android.features.messages.impl.actionlist.ActionListEvent
 import io.element.android.features.messages.impl.actionlist.ActionListView
 import io.element.android.features.messages.impl.actionlist.model.TimelineItemAction
@@ -50,6 +52,7 @@ import io.element.android.libraries.designsystem.theme.components.Scaffold
 import io.element.android.libraries.designsystem.theme.components.TopAppBar
 import io.element.android.libraries.matrix.api.timeline.Timeline
 import io.element.android.libraries.matrix.api.user.MatrixUser
+import io.element.android.libraries.matrix.ui.media.MediaTransferManager
 import io.element.android.libraries.ui.strings.CommonStrings
 import io.element.android.services.analytics.compose.LocalAnalyticsService
 import io.element.android.services.analyticsproviders.api.trackers.captureInteraction
@@ -58,11 +61,13 @@ import io.element.android.wysiwyg.link.Link
 @Composable
 fun PinnedMessagesListView(
     state: PinnedMessagesListState,
+    mediaTransferManager: MediaTransferManager,
     onBackClick: () -> Unit,
     onEventClick: (event: TimelineItem.Event) -> Unit,
     onUserDataClick: (MatrixUser) -> Unit,
     onLinkClick: (Link) -> Unit,
     onLinkLongClick: (Link) -> Unit,
+    onMediaFileTransfer: ((MessagesEvent.MediaFileTransfer) -> Unit)?,
     modifier: Modifier = Modifier,
 ) {
     Scaffold(
@@ -80,11 +85,13 @@ fun PinnedMessagesListView(
         content = { padding ->
             PinnedMessagesListContent(
                 state = state,
+                mediaTransferManager = mediaTransferManager,
                 onEventClick = onEventClick,
                 onUserDataClick = onUserDataClick,
                 onLinkClick = onLinkClick,
                 onLinkLongClick = onLinkLongClick,
                 onErrorDismiss = onBackClick,
+                onMediaFileTransfer = onMediaFileTransfer,
                 modifier = Modifier
                     .padding(padding)
                     .consumeWindowInsets(padding),
@@ -110,11 +117,13 @@ private fun PinnedMessagesListTopBar(
 @Composable
 private fun PinnedMessagesListContent(
     state: PinnedMessagesListState,
+    mediaTransferManager: MediaTransferManager,
     onEventClick: (event: TimelineItem.Event) -> Unit,
     onUserDataClick: (MatrixUser) -> Unit,
     onLinkClick: (Link) -> Unit,
     onLinkLongClick: (Link) -> Unit,
     onErrorDismiss: () -> Unit,
+    onMediaFileTransfer: ((MessagesEvent.MediaFileTransfer) -> Unit)?,
     modifier: Modifier = Modifier,
 ) {
     Box(modifier.fillMaxSize()) {
@@ -129,11 +138,13 @@ private fun PinnedMessagesListContent(
             PinnedMessagesListState.Empty -> PinnedMessagesListEmpty()
             is PinnedMessagesListState.Filled -> PinnedMessagesListLoaded(
                 state = state,
+                mediaTransferManager = mediaTransferManager,
                 displayThreadSummaries = state.displayThreadSummaries,
                 onEventClick = onEventClick,
                 onUserDataClick = onUserDataClick,
                 onLinkClick = onLinkClick,
                 onLinkLongClick = onLinkLongClick,
+                onMediaFileTransfer = onMediaFileTransfer
             )
             PinnedMessagesListState.Loading -> {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -167,11 +178,13 @@ private fun PinnedMessagesListEmpty(
 @Composable
 private fun PinnedMessagesListLoaded(
     state: PinnedMessagesListState.Filled,
+    mediaTransferManager: MediaTransferManager,
     displayThreadSummaries: Boolean,
     onEventClick: (event: TimelineItem.Event) -> Unit,
     onUserDataClick: (MatrixUser) -> Unit,
     onLinkClick: (Link) -> Unit,
     onLinkLongClick: (Link) -> Unit,
+    onMediaFileTransfer: ((MessagesEvent.MediaFileTransfer) -> Unit)?,
     modifier: Modifier = Modifier,
 ) {
     fun onActionSelected(timelineItemAction: TimelineItemAction, event: TimelineItem.Event) {
@@ -217,6 +230,7 @@ private fun PinnedMessagesListLoaded(
                 timelineItem = timelineItem,
                 timelineMode = Timeline.Mode.PinnedEvents,
                 timelineRoomInfo = state.timelineRoomInfo,
+                mediaTransferManager = mediaTransferManager,
                 renderReadReceipts = false,
                 timelineProtectionState = state.timelineProtectionState,
                 isLastOutgoingMessage = false,
@@ -244,6 +258,7 @@ private fun PinnedMessagesListLoaded(
                 eventContentView = { event, contentModifier, onContentLayoutChange ->
                     TimelineItemEventContentViewWrapper(
                         event = event,
+                        mediaTransferManager = mediaTransferManager,
                         timelineProtectionState = state.timelineProtectionState,
                         onContentClick = { onEventClick(event) },
                         onLongClick = { onMessageLongClick(event) },
@@ -252,9 +267,11 @@ private fun PinnedMessagesListLoaded(
                         },
                         onLinkLongClick = onLinkLongClick,
                         modifier = contentModifier,
-                        onContentLayoutChange = onContentLayoutChange
+                        onContentLayoutChange = onContentLayoutChange,
+                        onMediaFileTransfer = onMediaFileTransfer
                     )
                 },
+                onMediaFileTransfer = onMediaFileTransfer
             )
         }
     }
@@ -267,12 +284,14 @@ private fun PinnedMessagesListLoaded(
 @Composable
 private fun TimelineItemEventContentViewWrapper(
     event: TimelineItem.Event,
+    mediaTransferManager: MediaTransferManager,
     timelineProtectionState: TimelineProtectionState,
     onContentClick: () -> Unit,
     onLinkClick: (Link) -> Unit,
     onLinkLongClick: (Link) -> Unit,
     onLongClick: (() -> Unit)?,
     onContentLayoutChange: (ContentAvoidingLayoutData) -> Unit,
+    onMediaFileTransfer: ((MessagesEvent.MediaFileTransfer) -> Unit)?,
     modifier: Modifier = Modifier,
 ) {
     if (event.content is TimelineItemPollContent) {
@@ -284,6 +303,7 @@ private fun TimelineItemEventContentViewWrapper(
     } else {
         TimelineItemEventContentView(
             content = event.content,
+            mediaTransferManager = mediaTransferManager,
             hideMediaContent = timelineProtectionState.hideMediaContent(event.eventId, event.isMine),
             onShowContentClick = { timelineProtectionState.eventSink(TimelineProtectionEvent.ShowContent(event.eventId)) },
             onLinkClick = onLinkClick,
@@ -292,7 +312,8 @@ private fun TimelineItemEventContentViewWrapper(
             modifier = modifier,
             onContentClick = onContentClick,
             onLongClick = onLongClick,
-            onContentLayoutChange = onContentLayoutChange
+            onContentLayoutChange = onContentLayoutChange,
+            onMediaFileTransfer = onMediaFileTransfer
         )
     }
 }
@@ -303,10 +324,12 @@ internal fun PinnedMessagesListViewPreview(@PreviewParameter(PinnedMessagesListS
     ElementPreview {
         PinnedMessagesListView(
             state = state,
+            mediaTransferManager = FakeMediaTransferManager,
             onBackClick = {},
             onEventClick = { },
             onUserDataClick = {},
             onLinkClick = {},
             onLinkLongClick = {},
+            onMediaFileTransfer = {}
         )
     }

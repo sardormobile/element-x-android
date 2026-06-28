@@ -29,6 +29,7 @@ data class TimelineItemVideoContent(
     override val mimeType: String,
     override val formattedFileSize: String,
     override val fileExtension: String,
+    val isCached: Boolean
 ) : TimelineItemEventContentWithAttachment {
     override val type: String = "TimelineItemImageContent"
 

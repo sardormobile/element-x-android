@@ -10,6 +10,7 @@ package io.element.android.features.messages.impl.timeline.components.event
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import io.element.android.features.messages.impl.MessagesEvent
 import io.element.android.features.messages.impl.timeline.TimelineEvent
 import io.element.android.features.messages.impl.timeline.components.layout.ContentAvoidingLayoutData
 import io.element.android.features.messages.impl.timeline.di.LocalTimelineItemPresenterFactories
@@ -32,18 +33,21 @@ import io.element.android.features.messages.impl.timeline.model.event.TimelineIt
 import io.element.android.features.messages.impl.timeline.model.event.TimelineItemVoiceContent
 import io.element.android.features.messages.impl.timeline.model.event.ensureActiveLiveLocation
 import io.element.android.libraries.architecture.Presenter
+import io.element.android.libraries.matrix.ui.media.MediaTransferManager
 import io.element.android.libraries.voiceplayer.api.VoiceMessageState
 import io.element.android.wysiwyg.link.Link
 
 @Composable
 fun TimelineItemEventContentView(
     content: TimelineItemEventContent,
+    mediaTransferManager: MediaTransferManager,
     hideMediaContent: Boolean,
     onContentClick: (() -> Unit)?,
     onLongClick: (() -> Unit)?,
     onShowContentClick: () -> Unit,
     onLinkClick: (Link) -> Unit,
     onLinkLongClick: (Link) -> Unit,
+    onMediaFileTransfer: ((MessagesEvent.MediaFileTransfer) -> Unit)?,
     eventSink: (TimelineEvent.TimelineItemEvent) -> Unit,
     modifier: Modifier = Modifier,
     onContentLayoutChange: (ContentAvoidingLayoutData) -> Unit = {},
@@ -100,6 +104,7 @@ fun TimelineItemEventContentView(
         )
         is TimelineItemVideoContent -> TimelineItemVideoView(
             content = content,
+            mediaTransferManager = mediaTransferManager,
             hideMediaContent = hideMediaContent,
             onContentClick = onContentClick,
             onLongClick = onLongClick,
@@ -107,6 +112,7 @@ fun TimelineItemEventContentView(
             onLinkClick = onLinkClick,
             onLinkLongClick = onLinkLongClick,
             onContentLayoutChange = onContentLayoutChange,
+            onMediaFileTransfer = onMediaFileTransfer,
             modifier = modifier
         )
         is TimelineItemFileContent -> TimelineItemFileView(

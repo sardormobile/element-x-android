@@ -21,6 +21,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
+import io.element.android.features.messages.impl.FakeMediaTransferManager
 import io.element.android.features.messages.impl.timeline.TimelineEvent
 import io.element.android.features.messages.impl.timeline.aTimelineItemEvent
 import io.element.android.features.messages.impl.timeline.components.event.TimelineItemEventContentView
@@ -34,11 +35,13 @@ import io.element.android.features.messages.impl.timeline.model.event.aTimelineI
 import io.element.android.features.messages.impl.timeline.util.defaultTimelineContentPadding
 import io.element.android.libraries.designsystem.preview.ElementPreview
 import io.element.android.libraries.designsystem.preview.PreviewsDayNight
+import io.element.android.libraries.matrix.ui.media.MediaTransferManager
 import kotlinx.collections.immutable.persistentListOf
 
 @Composable
 fun TimelineItemStateEventRow(
     event: TimelineItem.Event,
+    mediaTransferManager: MediaTransferManager,
     renderReadReceipts: Boolean,
     isLastOutgoingMessage: Boolean,
     onClick: () -> Unit,
@@ -69,6 +72,7 @@ fun TimelineItemStateEventRow(
             ) {
                 TimelineItemEventContentView(
                     content = event.content,
+                    mediaTransferManager = mediaTransferManager,
                     onLinkClick = {},
                     onLinkLongClick = {},
                     hideMediaContent = false,
@@ -76,6 +80,7 @@ fun TimelineItemStateEventRow(
                     eventSink = eventSink,
                     onContentClick = null,
                     onLongClick = null,
+                    onMediaFileTransfer = null,
                     modifier = Modifier.defaultTimelineContentPadding()
                 )
             }
@@ -104,6 +109,7 @@ internal fun TimelineItemStateEventRowPreview() = ElementPreview {
                 receipts = persistentListOf(aReadReceiptData(0)),
             )
         ),
+        mediaTransferManager = FakeMediaTransferManager,
         renderReadReceipts = true,
         isLastOutgoingMessage = false,
         onClick = {},

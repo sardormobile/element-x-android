@@ -61,6 +61,7 @@ import io.element.android.libraries.matrix.api.timeline.item.event.VideoMessageT
 import io.element.android.libraries.matrix.api.timeline.item.event.VoiceMessageType
 import io.element.android.libraries.matrix.test.AN_EVENT_ID
 import io.element.android.libraries.matrix.test.A_USER_ID
+import io.element.android.libraries.matrix.test.FakeMatrixClient
 import io.element.android.libraries.matrix.test.media.aMediaSource
 import io.element.android.libraries.matrix.test.permalink.FakePermalinkParser
 import io.element.android.libraries.matrix.test.timeline.aProfileDetails
@@ -250,6 +251,7 @@ import kotlin.time.Duration.Companion.minutes
             thumbnailWidth = null,
             thumbnailHeight = null,
             fileExtension = "",
+            isCached = false
         )
         assertThat(result).isEqualTo(expected)
     }
@@ -304,6 +306,7 @@ import kotlin.time.Duration.Companion.minutes
             thumbnailWidth = 5,
             thumbnailHeight = 10,
             fileExtension = "mp4",
+            isCached = false
         )
         assertThat(result).isEqualTo(expected)
     }
@@ -793,6 +796,7 @@ import kotlin.time.Duration.Companion.minutes
         htmlConverterProvider = FakeHtmlConverterProvider(htmlConverterTransform, domConverterTransform),
         permalinkParser = permalinkParser,
         textPillificationHelper = FakeTextPillificationHelper(),
+        client = FakeMatrixClient()
     )
 
     private fun createStickerContent(

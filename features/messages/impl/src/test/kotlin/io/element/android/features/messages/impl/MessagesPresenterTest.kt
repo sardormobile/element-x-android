@@ -84,6 +84,7 @@ import io.element.android.libraries.matrix.test.A_USER_ID
 import io.element.android.libraries.matrix.test.A_USER_ID_2
 import io.element.android.libraries.matrix.test.core.aBuildMeta
 import io.element.android.libraries.matrix.test.encryption.FakeEncryptionService
+import io.element.android.libraries.matrix.test.media.FakeMatrixMediaLoader
 import io.element.android.libraries.matrix.test.permalink.FakePermalinkParser
 import io.element.android.libraries.matrix.test.room.FakeBaseRoom
 import io.element.android.libraries.matrix.test.room.FakeJoinedRoom
@@ -431,7 +432,8 @@ class MessagesPresenterTest {
                     thumbnailHeight = 20,
                     aspectRatio = 1.0f,
                     fileExtension = "mp4",
-                    formattedFileSize = "50MB"
+                    formattedFileSize = "50MB",
+                    isCached = false
                 )
             )
             initialState.eventSink(MessagesEvent.HandleAction(TimelineItemAction.Reply, mediaMessage))
@@ -1414,6 +1416,7 @@ class MessagesPresenterTest {
             markAsFullyRead = markAsFullyRead,
             liveLocationShareManager = liveLocationShareManager,
             sessionCoroutineScope = backgroundScope,
+            mediaLoader = FakeMatrixMediaLoader(),
         )
     }
 }

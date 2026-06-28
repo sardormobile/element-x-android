@@ -29,6 +29,7 @@ import io.element.android.features.messages.impl.utils.TextPillificationHelper
 import io.element.android.libraries.androidutils.filesize.FileSizeFormatter
 import io.element.android.libraries.androidutils.text.safeLinkify
 import io.element.android.libraries.core.mimetype.MimeTypes
+import io.element.android.libraries.matrix.api.MatrixClient
 import io.element.android.libraries.matrix.api.core.EventId
 import io.element.android.libraries.matrix.api.core.UserId
 import io.element.android.libraries.matrix.api.permalink.PermalinkParser
@@ -51,6 +52,7 @@ import io.element.android.libraries.mediaviewer.api.util.FileExtensionExtractor
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import org.jsoup.nodes.Document
+import timber.log.Timber
 import kotlin.time.Duration
 
 private const val MIN_IMAGE_SIZE = 1L
@@ -65,8 +67,9 @@ class TimelineItemContentMessageFactory(
     private val htmlConverterProvider: HtmlConverterProvider,
     private val permalinkParser: PermalinkParser,
     private val textPillificationHelper: TextPillificationHelper,
+    private val client: MatrixClient
 ) {
-    fun create(
+    suspend fun create(
         content: MessageContent,
         senderId: UserId,
         senderProfile: ProfileDetails,
@@ -163,6 +166,9 @@ class TimelineItemContentMessageFactory(
                 val formattedCaption = dom?.let(::parseHtml)
                     ?: messageType.caption?.withLinks()
                 val aspectRatio = aspectRatioOf(messageType.info?.width, messageType.info?.height)
+                val isCached = client.matrixMediaLoader.hasMediaInCache(messageType.source)
+
+                Timber.tag("transmissionProgress123").d("isCached: $isCached, safeUrl: ${messageType.source.safeUrl}")
                 TimelineItemVideoContent(
                     filename = messageType.filename,
                     fileSize = messageType.info?.size ?: 0,
@@ -181,6 +187,7 @@ class TimelineItemContentMessageFactory(
                     aspectRatio = aspectRatio,
                     formattedFileSize = fileSizeFormatter.format(messageType.info?.size ?: 0),
                     fileExtension = fileExtensionExtractor.extractFromName(messageType.filename),
+                    isCached = isCached
                 )
             }
             is AudioMessageType -> {

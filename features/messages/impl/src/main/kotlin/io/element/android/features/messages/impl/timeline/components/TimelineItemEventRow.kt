@@ -58,6 +58,7 @@ import androidx.constraintlayout.compose.ConstrainScope
 import androidx.constraintlayout.compose.ConstraintLayout
 import io.element.android.compound.theme.ElementTheme
 import io.element.android.compound.tokens.generated.CompoundIcons
+import io.element.android.features.messages.impl.MessagesEvent
 import io.element.android.features.messages.impl.timeline.TimelineEvent
 import io.element.android.features.messages.impl.timeline.TimelineRoomInfo
 import io.element.android.features.messages.impl.timeline.aTimelineItemEvent
@@ -112,6 +113,7 @@ import io.element.android.libraries.matrix.api.timeline.item.event.getAvatarUrl
 import io.element.android.libraries.matrix.api.timeline.item.event.getDisambiguatedDisplayName
 import io.element.android.libraries.matrix.api.timeline.item.event.getDisplayName
 import io.element.android.libraries.matrix.api.user.MatrixUser
+import io.element.android.libraries.matrix.ui.media.MediaTransferManager
 import io.element.android.libraries.matrix.ui.messages.reply.InReplyToDetails
 import io.element.android.libraries.matrix.ui.messages.reply.InReplyToView
 import io.element.android.libraries.matrix.ui.messages.reply.eventId
@@ -139,6 +141,7 @@ private val BUBBLE_INCOMING_OFFSET = 16.dp
 @Composable
 fun TimelineItemEventRow(
     event: TimelineItem.Event,
+    mediaTransferManager: MediaTransferManager,
     timelineMode: Timeline.Mode,
     timelineRoomInfo: TimelineRoomInfo,
     timelineProtectionState: TimelineProtectionState,
@@ -156,6 +159,7 @@ fun TimelineItemEventRow(
     onMoreReactionsClick: (eventId: TimelineItem.Event) -> Unit,
     onReadReceiptClick: (event: TimelineItem.Event) -> Unit,
     onSwipeToReply: () -> Unit,
+    onMediaFileTransfer: ((MessagesEvent.MediaFileTransfer) -> Unit)?,
     eventSink: (TimelineEvent.TimelineItemEvent) -> Unit,
     modifier: Modifier = Modifier,
     eventContentView: @Composable (Modifier, (ContentAvoidingLayoutData) -> Unit) -> Unit = { contentModifier, onContentLayoutChange ->
@@ -164,6 +168,7 @@ fun TimelineItemEventRow(
 
         TimelineItemEventContentView(
             content = event.content,
+            mediaTransferManager = mediaTransferManager,
             hideMediaContent = timelineProtectionState.hideMediaContent(event.eventId),
             onContentClick = onContentClick,
             onLongClick = onLongClick,
@@ -172,7 +177,8 @@ fun TimelineItemEventRow(
             onLinkLongClick = onLinkLongClick,
             eventSink = eventSink,
             modifier = contentModifier,
-            onContentLayoutChange = onContentLayoutChange
+            onContentLayoutChange = onContentLayoutChange,
+            onMediaFileTransfer = onMediaFileTransfer
         )
     },
 ) {

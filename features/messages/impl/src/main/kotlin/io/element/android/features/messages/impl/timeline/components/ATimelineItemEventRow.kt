@@ -9,6 +9,7 @@
 package io.element.android.features.messages.impl.timeline.components
 
 import androidx.compose.runtime.Composable
+import io.element.android.features.messages.impl.FakeMediaTransferManager
 import io.element.android.features.messages.impl.timeline.TimelineRoomInfo
 import io.element.android.features.messages.impl.timeline.aTimelineRoomInfo
 import io.element.android.features.messages.impl.timeline.model.TimelineItem
@@ -28,6 +29,7 @@ internal fun ATimelineItemEventRow(
     displayThreadSummaries: Boolean = false,
 ) = TimelineItemEventRow(
     event = event,
+    mediaTransferManager = FakeMediaTransferManager,
     timelineMode = timelineMode,
     timelineRoomInfo = timelineRoomInfo,
     renderReadReceipts = renderReadReceipts,
@@ -46,4 +48,5 @@ internal fun ATimelineItemEventRow(
     onReadReceiptClick = {},
     onSwipeToReply = {},
     eventSink = {},
+    onMediaFileTransfer = {}
 )

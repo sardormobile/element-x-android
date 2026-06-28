@@ -14,6 +14,7 @@ import io.element.android.libraries.matrix.api.core.EventId
 import io.element.android.libraries.matrix.api.core.RoomId
 import io.element.android.libraries.matrix.api.core.ThreadId
 import io.element.android.libraries.matrix.api.timeline.Timeline
+import io.element.android.libraries.mediaviewer.impl.model.MediaItem
 import kotlin.time.Duration
 
 sealed interface TimelineEvent {
@@ -59,4 +60,8 @@ sealed interface TimelineEvent {
     ) : TimelineItemPollEvent
 
     data object StopLiveLocationShare : TimelineItemEvent
+
+    data class DownloadMediaFile(val arg: MediaItem.Event) : TimelineItemEvent
+
+    data class CancelMediaFile(val arg: MediaItem.Event) : TimelineItemEvent
 }

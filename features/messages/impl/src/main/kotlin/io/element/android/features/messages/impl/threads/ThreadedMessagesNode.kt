@@ -60,6 +60,7 @@ import io.element.android.libraries.matrix.api.core.RoomId
 import io.element.android.libraries.matrix.api.core.ThreadId
 import io.element.android.libraries.matrix.api.core.UserId
 import io.element.android.libraries.matrix.api.core.toRoomIdOrAlias
+import io.element.android.libraries.matrix.api.media.MatrixMediaLoader
 import io.element.android.libraries.matrix.api.permalink.PermalinkData
 import io.element.android.libraries.matrix.api.permalink.PermalinkParser
 import io.element.android.libraries.matrix.api.room.CreateTimelineParams
@@ -67,6 +68,7 @@ import io.element.android.libraries.matrix.api.room.JoinedRoom
 import io.element.android.libraries.matrix.api.room.alias.matches
 import io.element.android.libraries.matrix.api.timeline.Timeline
 import io.element.android.libraries.matrix.api.timeline.item.TimelineItemDebugInfo
+import io.element.android.libraries.matrix.ui.media.MediaTransferManager
 import io.element.android.libraries.ui.utils.a11y.hasExternalKeyboard
 import io.element.android.libraries.ui.utils.a11y.isTalkbackActive
 import io.element.android.services.analytics.api.AnalyticsService
@@ -90,6 +92,8 @@ class ThreadedMessagesNode(
     private val permalinkParser: PermalinkParser,
     private val appNavigationStateService: AppNavigationStateService,
     private val roomMemberModerationRenderer: RoomMemberModerationRenderer,
+    private val mediaTransferManager: MediaTransferManager,
+    private val mediaLoader: MatrixMediaLoader,
 ) : Node(buildContext, plugins = plugins), MessagesNavigator {
     data class Inputs(
         val threadRootEventId: ThreadId,
@@ -113,7 +117,7 @@ class ThreadedMessagesNode(
         return presenterFactory.create(
             navigator = this,
             composerPresenter = messageComposerPresenterFactory.create(timelineController, this, isInThread = true),
-            timelinePresenter = timelinePresenterFactory.create(timelineController = timelineController, this),
+            timelinePresenter = timelinePresenterFactory.create(timelineController = timelineController, navigator = this, mediaLoader = mediaLoader),
             // TODO add special processor for threaded timeline
             actionListPresenter = actionListPresenterFactory.create(
                 postProcessor = TimelineItemActionPostProcessor.Default,
@@ -270,6 +274,7 @@ class ThreadedMessagesNode(
 
                 MessagesView(
                     state = state,
+                    mediaTransferManager = mediaTransferManager,
                     onBackClick = this::navigateUp,
                     onRoomDetailsClick = {},
                     onEventContentClick = { isLive, event ->

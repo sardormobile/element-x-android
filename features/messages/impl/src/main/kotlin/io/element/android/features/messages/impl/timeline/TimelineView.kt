@@ -51,6 +51,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import io.element.android.compound.theme.ElementTheme
 import io.element.android.compound.tokens.generated.CompoundIcons
+import io.element.android.features.messages.impl.FakeMediaTransferManager
+import io.element.android.features.messages.impl.MessagesEvent
 import io.element.android.features.messages.impl.crypto.sendfailure.resolve.ResolveVerifiedUserSendFailureView
 import io.element.android.features.messages.impl.timeline.components.FloatingDateBadgeOverlay
 import io.element.android.features.messages.impl.timeline.components.TimelineItemRow
@@ -74,6 +76,7 @@ import io.element.android.libraries.designsystem.utils.animateScrollToItemCenter
 import io.element.android.libraries.matrix.api.core.EventId
 import io.element.android.libraries.matrix.api.timeline.Timeline
 import io.element.android.libraries.matrix.api.user.MatrixUser
+import io.element.android.libraries.matrix.ui.media.MediaTransferManager
 import io.element.android.libraries.testtags.TestTags
 import io.element.android.libraries.testtags.testTag
 import io.element.android.libraries.ui.strings.CommonStrings
@@ -93,6 +96,7 @@ import kotlin.time.Duration.Companion.milliseconds
 @Composable
 fun TimelineView(
     state: TimelineState,
+    mediaTransferManager: MediaTransferManager,
     timelineProtectionState: TimelineProtectionState,
     onUserDataClick: (MatrixUser) -> Unit,
     onLinkClick: (Link) -> Unit,
@@ -103,6 +107,7 @@ fun TimelineView(
     onReactionLongClick: (emoji: String, TimelineItem.Event) -> Unit,
     onMoreReactionsClick: (TimelineItem.Event) -> Unit,
     onReadReceiptClick: (TimelineItem.Event) -> Unit,
+    onMediaFileTransfer: ((MessagesEvent.MediaFileTransfer) -> Unit)?,
     modifier: Modifier = Modifier,
     lazyListState: LazyListState = rememberLazyListState(),
     forceJumpToBottomVisibility: Boolean = false,
@@ -171,6 +176,7 @@ fun TimelineView(
                         timelineMode = state.timelineMode,
                         timelineRoomInfo = state.timelineRoomInfo,
                         timelineProtectionState = timelineProtectionState,
+                        mediaTransferManager = mediaTransferManager,
                         renderReadReceipts = state.renderReadReceipts,
                         isLastOutgoingMessage = state.isLastOutgoingMessage(timelineItem.identifier()),
                         focusedEventId = state.focusedEventId,
@@ -187,6 +193,7 @@ fun TimelineView(
                         onReadReceiptClick = onReadReceiptClick,
                         onSwipeToReply = onSwipeToReply,
                         eventSink = state.eventSink,
+                        onMediaFileTransfer = onMediaFileTransfer
                     )
                 }
             }
@@ -419,6 +426,7 @@ internal fun TimelineViewPreview(
                 ),
                 focusedEventIndex = 0,
             ),
+            mediaTransferManager = FakeMediaTransferManager,
             timelineProtectionState = aTimelineProtectionState(),
             onUserDataClick = {},
             onLinkClick = {},
@@ -429,6 +437,7 @@ internal fun TimelineViewPreview(
             onReactionLongClick = { _, _ -> },
             onMoreReactionsClick = {},
             onReadReceiptClick = {},
+            onMediaFileTransfer = {},
             forceJumpToBottomVisibility = true,
         )
     }

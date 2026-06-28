@@ -26,8 +26,9 @@ import dev.zacsweers.metro.AssistedInject
 import io.element.android.features.location.api.live.ActiveLiveLocationShareManager
 import io.element.android.features.messages.impl.MessagesNavigator
 import io.element.android.features.messages.impl.UserEventPermissions
-import io.element.android.features.messages.impl.crypto.sendfailure.resolve.ResolveVerifiedUserSendFailureEvent
+import io.element.android.features.messages.impl.crypto.sendfailure.resolve.ResolveVerifiedUserSendFailureEvent.*
 import io.element.android.features.messages.impl.crypto.sendfailure.resolve.ResolveVerifiedUserSendFailureState
+import io.element.android.features.messages.impl.timeline.FocusRequestState.*
 import io.element.android.features.messages.impl.timeline.components.MessageShieldData
 import io.element.android.features.messages.impl.timeline.factories.TimelineItemsFactory
 import io.element.android.features.messages.impl.timeline.factories.TimelineItemsFactoryConfig
@@ -48,12 +49,15 @@ import io.element.android.libraries.featureflag.api.FeatureFlags
 import io.element.android.libraries.matrix.api.core.EventId
 import io.element.android.libraries.matrix.api.core.UniqueId
 import io.element.android.libraries.matrix.api.core.asEventId
+import io.element.android.libraries.matrix.api.media.MatrixMediaLoader
 import io.element.android.libraries.matrix.api.room.JoinedRoom
 import io.element.android.libraries.matrix.api.room.powerlevels.permissionsAsState
 import io.element.android.libraries.matrix.api.room.roomMembers
 import io.element.android.libraries.matrix.api.timeline.ReceiptType
 import io.element.android.libraries.matrix.api.timeline.Timeline
 import io.element.android.libraries.matrix.api.timeline.item.event.TimelineItemEventOrigin
+import io.element.android.libraries.mediaviewer.impl.model.mediaInfo
+import io.element.android.libraries.mediaviewer.impl.model.mediaSource
 import io.element.android.libraries.preferences.api.store.SessionPreferencesStore
 import io.element.android.services.analytics.api.AnalyticsLongRunningTransaction.DisplayFirstTimelineItems
 import io.element.android.services.analytics.api.AnalyticsLongRunningTransaction.NotificationToMessage
@@ -96,6 +100,7 @@ class TimelinePresenter(
     private val featureFlagService: FeatureFlagService,
     private val analyticsService: AnalyticsService,
     private val liveLocationShareManager: ActiveLiveLocationShareManager,
+    @Assisted private val mediaLoader: MatrixMediaLoader,
 ) : Presenter<TimelineState> {
     private val tag = "TimelinePresenter"
 
@@ -103,7 +108,8 @@ class TimelinePresenter(
     interface Factory {
         fun create(
             timelineController: TimelineController,
-            navigator: MessagesNavigator
+            navigator: MessagesNavigator,
+            mediaLoader: MatrixMediaLoader
         ): TimelinePresenter
     }
 
@@ -206,7 +212,7 @@ class TimelinePresenter(
                     liveLocationShareManager.stopShare(room.roomId)
                 }
                 is TimelineEvent.FocusOnEvent -> sessionCoroutineScope.launch {
-                    focusRequestState.value = FocusRequestState.Requested(event.eventId, event.debounce)
+                    focusRequestState.value = Requested(event.eventId, event.debounce)
                     delay(event.debounce)
                     Timber.tag(tag).d("Started focus on ${event.eventId}")
                     focusOnEvent(event.eventId, focusRequestState)
@@ -226,7 +232,7 @@ class TimelinePresenter(
                 TimelineEvent.HideShieldDialog -> messageShieldDialogData.value = null
                 is TimelineEvent.ShowShieldDialog -> messageShieldDialogData.value = event.messageShieldData
                 is TimelineEvent.ComputeVerifiedUserSendFailure -> {
-                    resolveVerifiedUserSendFailureState.eventSink(ResolveVerifiedUserSendFailureEvent.ComputeForMessage(event.event))
+                    resolveVerifiedUserSendFailureState.eventSink(ComputeForMessage(event.event))
                 }
                 is TimelineEvent.NavigateToPredecessorOrSuccessorRoom -> {
                     // Navigate to the predecessor or successor room
@@ -238,6 +244,18 @@ class TimelinePresenter(
                         threadRootId = event.threadRootEventId,
                         focusedEventId = event.focusedEvent,
                     )
+                }
+                is TimelineEvent.DownloadMediaFile -> {
+                    localScope.launch {
+                        mediaLoader.downloadMediaFile(
+                            source = event.arg.mediaSource(),
+                            mimeType = event.arg.mediaInfo().mimeType,
+                            filename = event.arg.mediaInfo().filename,
+                        )
+                    }
+                }
+                is TimelineEvent.CancelMediaFile -> {
+                    mediaLoader.cancelMediaDownload(event.arg.mediaSource())
                 }
             }
         }

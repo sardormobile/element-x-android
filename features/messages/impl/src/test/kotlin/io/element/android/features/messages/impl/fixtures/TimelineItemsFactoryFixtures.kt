@@ -59,6 +59,7 @@ internal fun aTimelineItemContentFactory(
         htmlConverterProvider = FakeHtmlConverterProvider(),
         permalinkParser = FakePermalinkParser(),
         textPillificationHelper = FakeTextPillificationHelper(),
+        client = matrixClient
     ),
     redactedMessageFactory = TimelineItemContentRedactedFactory(),
     stickerFactory = TimelineItemContentStickerFactory(

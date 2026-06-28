@@ -26,6 +26,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import io.element.android.compound.theme.ElementTheme
+import io.element.android.features.messages.impl.MessagesEvent
 import io.element.android.features.messages.impl.timeline.TimelineEvent
 import io.element.android.features.messages.impl.timeline.TimelineRoomInfo
 import io.element.android.features.messages.impl.timeline.components.event.TimelineItemEventContentView
@@ -46,6 +47,7 @@ import io.element.android.libraries.designsystem.text.toPx
 import io.element.android.libraries.matrix.api.core.EventId
 import io.element.android.libraries.matrix.api.timeline.Timeline
 import io.element.android.libraries.matrix.api.user.MatrixUser
+import io.element.android.libraries.matrix.ui.media.MediaTransferManager
 import io.element.android.libraries.ui.strings.CommonStrings
 import io.element.android.libraries.ui.utils.a11y.isTalkbackActive
 import io.element.android.wysiwyg.link.Link
@@ -56,6 +58,7 @@ internal fun TimelineItemRow(
     timelineItem: TimelineItem,
     timelineMode: Timeline.Mode,
     timelineRoomInfo: TimelineRoomInfo,
+    mediaTransferManager: MediaTransferManager,
     renderReadReceipts: Boolean,
     isLastOutgoingMessage: Boolean,
     timelineProtectionState: TimelineProtectionState,
@@ -73,11 +76,13 @@ internal fun TimelineItemRow(
     onReadReceiptClick: (TimelineItem.Event) -> Unit,
     onSwipeToReply: (TimelineItem.Event) -> Unit,
     eventSink: (TimelineEvent.TimelineItemEvent) -> Unit,
+    onMediaFileTransfer: ((MessagesEvent.MediaFileTransfer) -> Unit)?,
     modifier: Modifier = Modifier,
     eventContentView: @Composable (TimelineItem.Event, Modifier, (ContentAvoidingLayoutData) -> Unit) -> Unit =
         { event, contentModifier, onContentLayoutChange ->
             TimelineItemEventContentView(
                 content = event.content,
+                mediaTransferManager = mediaTransferManager,
                 hideMediaContent = timelineProtectionState.hideMediaContent(event.eventId, event.isMine),
                 onShowContentClick = { timelineProtectionState.eventSink(TimelineProtectionEvent.ShowContent(event.eventId)) },
                 onContentClick = { onContentClick(event) },
@@ -86,7 +91,8 @@ internal fun TimelineItemRow(
                 onLinkLongClick = onLinkLongClick,
                 eventSink = eventSink,
                 modifier = contentModifier,
-                onContentLayoutChange = onContentLayoutChange
+                onContentLayoutChange = onContentLayoutChange,
+                onMediaFileTransfer = onMediaFileTransfer
             )
         },
 ) {
@@ -114,6 +120,7 @@ internal fun TimelineItemRow(
                     is TimelineItemStateContent, is TimelineItemLegacyCallInviteContent -> {
                         TimelineItemStateEventRow(
                             event = timelineItem,
+                            mediaTransferManager = mediaTransferManager,
                             renderReadReceipts = renderReadReceipts,
                             isLastOutgoingMessage = isLastOutgoingMessage,
                             onClick = { onContentClick(timelineItem) },
@@ -165,6 +172,7 @@ internal fun TimelineItemRow(
                                     }
                                 ),
                             event = timelineItem,
+                            mediaTransferManager = mediaTransferManager,
                             timelineMode = timelineMode,
                             timelineRoomInfo = timelineRoomInfo,
                             renderReadReceipts = renderReadReceipts,
@@ -182,6 +190,7 @@ internal fun TimelineItemRow(
                             onMoreReactionsClick = onMoreReactionsClick,
                             onReadReceiptClick = onReadReceiptClick,
                             onSwipeToReply = { onSwipeToReply(timelineItem) },
+                            onMediaFileTransfer = onMediaFileTransfer,
                             eventSink = eventSink,
                             eventContentView = { contentModifier, onContentLayoutChange ->
                                 eventContentView(timelineItem, contentModifier, onContentLayoutChange)
@@ -196,6 +205,7 @@ internal fun TimelineItemRow(
                     timelineMode = timelineMode,
                     timelineRoomInfo = timelineRoomInfo,
                     timelineProtectionState = timelineProtectionState,
+                    mediaTransferManager = mediaTransferManager,
                     renderReadReceipts = renderReadReceipts,
                     isLastOutgoingMessage = isLastOutgoingMessage,
                     focusedEventId = focusedEventId,
@@ -211,6 +221,7 @@ internal fun TimelineItemRow(
                     onMoreReactionsClick = onMoreReactionsClick,
                     onReadReceiptClick = onReadReceiptClick,
                     eventSink = eventSink,
+                    onMediaFileTransfer = onMediaFileTransfer
                 )
             }
         }

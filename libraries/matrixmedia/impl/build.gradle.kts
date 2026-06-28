@@ -24,6 +24,7 @@ dependencies {
     implementation(projects.libraries.matrixmedia.api)
     implementation(projects.libraries.sessionStorage.api)
     implementation(projects.libraries.designsystem)
+    implementation(projects.libraries.androidutils)
     implementation(libs.coil.compose)
     implementation(libs.coil.gif)
     implementation(libs.coil.network.okhttp)

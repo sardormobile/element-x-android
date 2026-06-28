@@ -44,5 +44,6 @@ fun aTimelineItemVideoContent(
     thumbnailHeight = 300,
     mimeType = MimeTypes.Mp4,
     formattedFileSize = "14MB",
-    fileExtension = "mp4"
+    fileExtension = "mp4",
+    isCached = false
 )

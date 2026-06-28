@@ -123,6 +123,7 @@ import io.element.android.libraries.matrix.api.room.tombstone.SuccessorRoom
 import io.element.android.libraries.matrix.api.timeline.Timeline
 import io.element.android.libraries.matrix.api.timeline.item.event.LocalEventSendState
 import io.element.android.libraries.matrix.api.user.MatrixUser
+import io.element.android.libraries.matrix.ui.media.MediaTransferManager
 import io.element.android.libraries.textcomposer.model.TextEditorState
 import io.element.android.libraries.ui.strings.CommonStrings
 import io.element.android.wysiwyg.link.Link
@@ -133,6 +134,7 @@ import kotlin.time.Duration.Companion.milliseconds
 @Composable
 fun MessagesView(
     state: MessagesState,
+    mediaTransferManager: MediaTransferManager,
     onBackClick: () -> Unit,
     onRoomDetailsClick: () -> Unit,
     onEventContentClick: (isLive: Boolean, event: TimelineItem.Event) -> Boolean,
@@ -204,6 +206,9 @@ fun MessagesView(
         state.customReactionState.eventSink(CustomReactionEvent.ShowCustomReactionSheet(event))
     }
 
+    fun onMediaFileTransferClick(event: MessagesEvent.MediaFileTransfer) {
+        state.eventSink(event)
+    }
     val expandableState = rememberExpandableBottomSheetLayoutState()
     ExpandableBottomSheetLayout(
         modifier = modifier
@@ -257,6 +262,7 @@ fun MessagesView(
                     ) {
                         MessagesViewContent(
                             state = state,
+                            mediaTransferManager = mediaTransferManager,
                             onContentClick = ::onContentClick,
                             onMessageLongClick = ::onMessageLongClick,
                             onUserDataClick = {
@@ -282,6 +288,9 @@ fun MessagesView(
                             onCreatePollClick = onCreatePollClick,
                             onSwipeToReply = { targetEvent ->
                                 state.eventSink(MessagesEvent.HandleAction(TimelineItemAction.Reply, targetEvent))
+                            },
+                            onMediaFileTransfer = { event ->
+                                onMediaFileTransferClick(event)
                             },
                             forceJumpToBottomVisibility = forceJumpToBottomVisibility,
                             onViewAllPinnedMessagesClick = onViewAllPinnedMessagesClick,
@@ -451,6 +460,7 @@ private fun ReinviteDialog(state: MessagesState) {
 @Composable
 private fun MessagesViewContent(
     state: MessagesState,
+    mediaTransferManager: MediaTransferManager,
     onContentClick: (TimelineItem.Event) -> Unit,
     onUserDataClick: (MatrixUser) -> Unit,
     onLinkClick: (Link, Boolean) -> Unit,
@@ -464,6 +474,7 @@ private fun MessagesViewContent(
     onViewAllPinnedMessagesClick: () -> Unit,
     forceJumpToBottomVisibility: Boolean,
     onSwipeToReply: (TimelineItem.Event) -> Unit,
+    onMediaFileTransfer: ((MessagesEvent.MediaFileTransfer) -> Unit)?,
     modifier: Modifier = Modifier,
     knockRequestsBannerView: @Composable () -> Unit,
 ) {
@@ -506,6 +517,7 @@ private fun MessagesViewContent(
 
             TimelineView(
                 state = state.timelineState,
+                mediaTransferManager = mediaTransferManager,
                 timelineProtectionState = state.timelineProtectionState,
                 onUserDataClick = onUserDataClick,
                 onLinkClick = { link -> onLinkClick(link, false) },
@@ -516,6 +528,7 @@ private fun MessagesViewContent(
                 onReactionLongClick = onReactionLongClick,
                 onMoreReactionsClick = onMoreReactionsClick,
                 onReadReceiptClick = onReadReceiptClick,
+                onMediaFileTransfer = onMediaFileTransfer,
                 forceJumpToBottomVisibility = forceJumpToBottomVisibility,
                 nestedScrollConnection = scrollBehavior.nestedScrollConnection,
                 floatingDateTopOffset = pinnedBannerHeightDp,
@@ -634,6 +647,7 @@ private fun SuccessorRoomBanner(
 internal fun MessagesViewPreview(@PreviewParameter(MessagesStateProvider::class) state: MessagesState) = ElementPreview {
     MessagesView(
         state = state,
+        mediaTransferManager = FakeMediaTransferManager,
         onBackClick = {},
         onRoomDetailsClick = {},
         onEventContentClick = { _, _ -> false },
@@ -689,6 +703,7 @@ internal fun MessagesViewA11yPreview() = ElementPreview {
                 focusedEventIndex = 2,
             )
         ),
+        mediaTransferManager = FakeMediaTransferManager,
         onBackClick = {},
         onRoomDetailsClick = {},
         onEventContentClick = { _, _ -> false },

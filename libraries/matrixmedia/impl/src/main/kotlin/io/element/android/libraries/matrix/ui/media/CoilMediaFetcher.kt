@@ -32,6 +32,7 @@ internal class CoilMediaFetcher(
             Timber.e("MediaData source is null")
             return null
         }
+        Timber.tag("transmissionProgress").d("CoilMediaFetcher: ${mediaData.kind}, ${mediaData.source}")
         return when (val kind = mediaData.kind) {
             is MediaRequestData.Kind.Content -> fetchContent(mediaSource)
             is MediaRequestData.Kind.Thumbnail -> fetchThumbnail(mediaSource, kind)
