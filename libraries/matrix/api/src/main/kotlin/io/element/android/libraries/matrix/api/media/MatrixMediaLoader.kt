@@ -36,4 +36,8 @@ interface MatrixMediaLoader {
         filename: String?,
         useCache: Boolean = true,
     ): Result<MediaFile>
+
+    fun cancelMediaDownload(source: MediaSource)
+
+    suspend fun hasMediaInCache(source: MediaSource): Boolean
 }

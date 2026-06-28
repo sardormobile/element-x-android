@@ -13,6 +13,7 @@ import io.element.android.libraries.androidutils.diff.DefaultDiffCacheInvalidato
 import io.element.android.libraries.androidutils.diff.DiffCacheUpdater
 import io.element.android.libraries.androidutils.diff.MutableListDiffCache
 import io.element.android.libraries.core.coroutine.CoroutineDispatchers
+import io.element.android.libraries.matrix.api.MatrixClient
 import io.element.android.libraries.matrix.api.timeline.MatrixTimelineItem
 import io.element.android.libraries.mediaviewer.impl.model.MediaItem
 import kotlinx.collections.immutable.ImmutableList
@@ -73,7 +74,7 @@ class TimelineMediaItemsFactory(
         _timelineItems.emit(newTimelineItemStates.toImmutableList())
     }
 
-    private fun buildAndCacheItem(
+    private suspend fun buildAndCacheItem(
         timelineItems: List<MatrixTimelineItem>,
         index: Int,
     ): MediaItem? {

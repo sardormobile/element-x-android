@@ -10,8 +10,10 @@ package io.element.android.features.messages.impl
 
 import io.element.android.features.messages.impl.actionlist.model.TimelineItemAction
 import io.element.android.features.messages.impl.timeline.model.TimelineItem
+import io.element.android.libraries.matrix.api.media.MediaSource
 import io.element.android.libraries.matrix.api.timeline.item.event.EventOrTransactionId
 import io.element.android.libraries.matrix.api.user.MatrixUser
+import io.element.android.libraries.matrix.ui.media.MediaRequestData
 
 sealed interface MessagesEvent {
     data class HandleAction(val action: TimelineItemAction, val event: TimelineItem.Event) : MessagesEvent
@@ -21,9 +23,16 @@ sealed interface MessagesEvent {
     data object StopLiveLocationShare : MessagesEvent
     data object ShowLiveLocationShare : MessagesEvent
     data object MarkAsFullyReadAndExit : MessagesEvent
+
+    data class MediaFileTransfer(val mediaSource: MediaSource, val kind: MediaRequestData.Kind.File, val action: MediaFileTransferAction) : MessagesEvent
 }
 
 enum class InviteDialogAction {
     Cancel,
     Invite,
+}
+
+enum class MediaFileTransferAction {
+    Download,
+    Cancel
 }

@@ -74,6 +74,7 @@ import io.element.android.libraries.featureflag.api.FeatureFlags
 import io.element.android.libraries.matrix.api.core.toThreadId
 import io.element.android.libraries.matrix.api.encryption.EncryptionService
 import io.element.android.libraries.matrix.api.encryption.identity.IdentityState
+import io.element.android.libraries.matrix.api.media.MatrixMediaLoader
 import io.element.android.libraries.matrix.api.permalink.PermalinkParser
 import io.element.android.libraries.matrix.api.room.JoinedRoom
 import io.element.android.libraries.matrix.api.room.RoomInfo
@@ -129,6 +130,7 @@ class MessagesPresenter(
     private val addRecentEmoji: AddRecentEmoji,
     private val markAsFullyRead: MarkAsFullyRead,
     private val liveLocationShareManager: ActiveLiveLocationShareManager,
+    private val mediaLoader: MatrixMediaLoader,
     @SessionCoroutineScope private val sessionCoroutineScope: CoroutineScope,
 ) : Presenter<MessagesState> {
     @AssistedFactory
@@ -290,6 +292,22 @@ class MessagesPresenter(
                         navigator.close()
                     }.invokeOnCompletion {
                         markingAsReadAndExiting.set(false)
+                    }
+                }
+                is MessagesEvent.MediaFileTransfer -> {
+                    coroutineScope.launch {
+                        when (event.action) {
+                            MediaFileTransferAction.Download -> {
+                                mediaLoader.downloadMediaFile(
+                                    source = event.mediaSource,
+                                    mimeType = event.kind.mimeType,
+                                    filename = event.kind.fileName,
+                                )
+                            }
+                            MediaFileTransferAction.Cancel -> {
+                                mediaLoader.cancelMediaDownload(event.mediaSource)
+                            }
+                        }
                     }
                 }
             }
