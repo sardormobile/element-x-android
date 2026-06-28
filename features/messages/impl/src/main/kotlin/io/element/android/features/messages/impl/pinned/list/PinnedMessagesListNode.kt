@@ -37,6 +37,7 @@ import io.element.android.libraries.matrix.api.permalink.PermalinkData
 import io.element.android.libraries.matrix.api.permalink.PermalinkParser
 import io.element.android.libraries.matrix.api.timeline.Timeline
 import io.element.android.libraries.matrix.api.timeline.item.TimelineItemDebugInfo
+import io.element.android.libraries.matrix.ui.media.MediaTransferManager
 import io.element.android.libraries.ui.strings.CommonStrings
 import io.element.android.libraries.ui.utils.a11y.hasExternalKeyboard
 import io.element.android.libraries.ui.utils.a11y.isTalkbackActive
@@ -50,6 +51,7 @@ class PinnedMessagesListNode(
     actionListPresenterFactory: ActionListPresenter.Factory,
     private val timelineItemPresenterFactories: TimelineItemPresenterFactories,
     private val permalinkParser: PermalinkParser,
+    private val mediaTransferManager: MediaTransferManager,
 ) : Node(buildContext, plugins = plugins), PinnedMessagesListNavigator {
     interface Callback : Plugin {
         fun handleEventClick(event: TimelineItem.Event, canUseOverlay: Boolean)
@@ -115,6 +117,7 @@ class PinnedMessagesListNode(
             val state = presenter.present()
             PinnedMessagesListView(
                 state = state,
+                mediaTransferManager = mediaTransferManager,
                 onBackClick = ::navigateUp,
                 onEventClick = {
                     callback.handleEventClick(it, canUseOverlay)
@@ -130,6 +133,7 @@ class PinnedMessagesListNode(
                         toastMessage = toastMessage,
                     )
                 },
+                onMediaFileTransfer = {},
                 modifier = modifier
             )
         }

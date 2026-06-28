@@ -20,6 +20,7 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.v2.runAndroidComposeUiTest
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import io.element.android.features.messages.impl.FakeMediaTransferManager
 import io.element.android.features.messages.impl.actionlist.ActionListEvent
 import io.element.android.features.messages.impl.actionlist.anActionListState
 import io.element.android.features.messages.impl.timeline.aTimelineItemList
@@ -105,11 +106,13 @@ private fun AndroidComposeUiTest<ComponentActivity>.setPinnedMessagesListView(
     setSafeContent(clearAndroidUiDispatcher = true) {
         PinnedMessagesListView(
             state = state,
+            mediaTransferManager = FakeMediaTransferManager,
             onBackClick = onBackClick,
             onEventClick = onEventClick,
             onUserDataClick = onUserDataClick,
             onLinkClick = onLinkClick,
             onLinkLongClick = onLinkLongClick,
+            onMediaFileTransfer = {}
         )
     }
 }
