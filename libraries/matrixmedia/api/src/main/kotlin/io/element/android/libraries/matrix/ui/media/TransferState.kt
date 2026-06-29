@@ -10,9 +10,6 @@ package io.element.android.libraries.matrix.ui.media
 
 sealed interface TransferState {
     data object Idly: TransferState
-    data class NotDownloaded(
-        val totalSize: Long,
-    ) : TransferState
 
     data class InProgress(
         val current: Long,

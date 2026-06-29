@@ -221,7 +221,9 @@ fun TimelineItemVideoView(
                     }
                 )
                 Box(
-                    modifier = Modifier.roundedBackground().align(Alignment.Center),
+                    modifier = Modifier
+                        .roundedBackground()
+                        .align(Alignment.Center),
                     contentAlignment = Alignment.Center,
                 ) {
                     Image(
@@ -309,7 +311,7 @@ fun MediaDownloadChip(
             ) {
                 if (transferState is TransferState.InProgress) {
                     onCancelClick()
-                } else {
+                } else if (!isCached) {
                     onDownloadClick()
                 }
             }

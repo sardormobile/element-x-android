@@ -93,24 +93,28 @@ class RustMediaLoader(
                                 override fun transmissionProgress(progress: MediaFileTransferProgress) {
                                     when(progress) {
                                         MediaFileTransferProgress.Cancelled -> {
+                                            Timber.tag("transmissionProgress123").d("state: Cancelled")
                                             mediaTransferManager.updateTransfer(
                                                 transferId = source.safeUrl,
                                                 state = TransferState.Cancelled
                                             )
                                         }
                                         is MediaFileTransferProgress.Failed -> {
+                                            Timber.tag("transmissionProgress123").d("state: Failed")
                                             mediaTransferManager.updateTransfer(
                                                 transferId = source.safeUrl,
                                                 state = TransferState.Failed(progress.error)
                                             )
                                         }
-                                        MediaFileTransferProgress.Finished -> {
+                                        MediaFileTransferProgress.Success -> {
+                                            Timber.tag("transmissionProgress123").d("state: Success")
                                             mediaTransferManager.updateTransfer(
                                                 transferId = source.safeUrl,
                                                 state = TransferState.Success
                                             )
                                         }
                                         is MediaFileTransferProgress.Progress -> {
+                                            Timber.tag("transmissionProgress123").d("state: Progress")
                                             mediaTransferManager.updateTransfer(
                                                 transferId = source.safeUrl,
                                                 state = TransferState.InProgress(current = progress.current.toLong(), total = progress.total.toLong())
@@ -124,6 +128,7 @@ class RustMediaLoader(
                     }
                 }
             } catch (e: CancellationException) {
+                Timber.tag("transmissionProgress123").d("CancellationException")
                 cancelMediaDownload(source)
                 throw e
             }
