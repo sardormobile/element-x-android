@@ -77,6 +77,66 @@ This project is actively developed and supported. New users are recommended to u
 Element X Android requires a minimum SDK version of 24 (Android 7.0, Nougat). We aim to support devices running Android 7.0 and above, which covers a wide range of devices still in use today.
 
 Element Android Enterprise requires a minimum SDK version of 33 (Android 13, Tiramisu). For Element Enterprise, we support only devices that still receive security updates, which means devices running Android 13 and above. Android does not have a documented support policy, but some information can be found at [https://endoflife.date/android](https://endoflife.date/android).
+---
+
+## My Contribution
+
+This fork includes functionality that I implemented while working on media uploads in Element X Android and the Matrix Rust SDK.
+
+### Upload Progress & Cancellation
+
+Implemented end-to-end upload progress reporting and upload cancellation, enabling the Android application to receive real-time upload events from the Rust SDK.
+
+This work spans multiple layers of the application, from the Rust backend to the Android UI.
+
+### Implementation
+
+- Added upload progress propagation from the Rust SDK.
+- Added upload cancellation support.
+- Extended the UniFFI bindings to expose upload events.
+- Implemented Kotlin APIs for observing upload progress.
+- Connected upload events to the Android ViewModel.
+- Integrated progress updates into the Jetpack Compose UI.
+- Synchronized upload state between Rust and Android.
+
+### Architecture
+
+```text
+Jetpack Compose UI
+        │
+        ▼
+ViewModel
+        │
+        ▼
+Kotlin Layer
+        │
+        ▼
+UniFFI Bindings
+        │
+        ▼
+Matrix Rust SDK
+        │
+        ▼
+Media Transfer Manager
+```
+
+### Demo
+
+<p align="center">
+    <img src="docs/upload-progress.gif" width="360" alt="Upload progress demo">
+</p>
+
+### Technologies
+
+- Rust
+- Matrix Rust SDK
+- UniFFI
+- Kotlin
+- Coroutines
+- Flow
+- Jetpack Compose
+
+> This functionality was implemented in this fork and is not part of the upstream project.
 
 ## Contributing
 
